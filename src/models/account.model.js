@@ -8,8 +8,8 @@ const accountSchema=new mongoose.Schema({
     },
     accountType:{   
         type:String,
-        enum:['ACTIVE','FROZEN','CLOSED'],
-        required:[true,'Status can either be ACTIVE, FROZEN or CLOSED'],
+        enum:{values:['ACTIVE','FROZEN','CLOSED'],message:'Invalid account type'},
+        required:[true,'Account type can be ACTIVE, FROZEN, or CLOSED'],
         default:'ACTIVE'
     },
     currency:{

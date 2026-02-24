@@ -3,7 +3,6 @@
 const express = require('express');
 const app=express();
 const cookies=require('cookie-parser');
-const router=require('./routes/auth.routes');
 
 
 app.use(express.json());

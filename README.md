@@ -8,6 +8,7 @@ The frontend is intentionally deferred and will be implemented after backend com
 **Phase:** Backend foundation in progress  
 **API Health:** Running and connected to MongoDB  
 **Auth Module:** Functional (`register`, `login`)  
+**Account Module:** Functional (`create account` on protected route)  
 **Email Integration:** Welcome email flow integrated (Nodemailer + OAuth2)  
 **Frontend:** Not started yet (planned for next phase)
 
@@ -19,6 +20,8 @@ The frontend is intentionally deferred and will be implemented after backend com
 - JWT token generation
 - Token returned in JSON response and set in HttpOnly cookie
 - User login with credential verification
+- Protected account creation endpoint
+- Account model with status/type and currency defaults
 - MongoDB connection via Mongoose
 - Registration welcome email service
 
@@ -45,11 +48,16 @@ Backend-Ledger/
     ├── config/
     │   └── db.js
     ├── controllers/
-    │   └── auth.controller.js
+    │   ├── auth.controller.js
+    │   └── account.controller.js
+    ├── middleware/
+    │   └── auth.middleware.js
     ├── models/
-    │   └── user.model.js
+    │   ├── user.model.js
+    │   └── account.model.js
     ├── routes/
-    │   └── auth.routes.js
+    │   ├── auth.routes.js
+    │   └── account.routes.js
     └── services/
         └── email.service.js
 ```
@@ -103,6 +111,30 @@ Logs in an existing user.
 }
 ```
 
+### `POST /api/accounts`
+Creates a new account for the authenticated user.
+
+**Headers**
+```http
+Authorization: Bearer <jwt-token>
+```
+
+**Success response (`201`)**
+```json
+{
+  "message": "Account created successfully",
+  "account": {
+    "_id": "...",
+    "userId": "...",
+    "accountType": "ACTIVE",
+    "currency": "INR",
+    "createdAt": "...",
+    "updatedAt": "..."
+  },
+  "status": "success"
+}
+```
+
 ## Environment Variables
 
 Create a `.env` file in the root with:
@@ -134,8 +166,8 @@ npm start
 ## Backend Roadmap (Before Frontend)
 
 - [ ] Add logout endpoint + token invalidation strategy
-- [ ] Add auth middleware and protected routes
-- [ ] Add ledger/account domain models
+- [x] Add auth middleware and protected routes
+- [x] Add ledger/account domain models
 - [ ] Add transactions APIs (credit/debit/transfer)
 - [ ] Add validation middleware and centralized error handler
 - [ ] Add API documentation (OpenAPI/Swagger)
