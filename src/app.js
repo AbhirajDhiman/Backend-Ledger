@@ -8,7 +8,12 @@ const router=require('./routes/auth.routes');
 
 app.use(express.json());
 app.use(cookies()); 
-app.use('/api/auth',router);
+// Routes
+const accountRoutes=require('./routes/account.routes');
+const authRoutes=require('./routes/auth.routes');
+//Use Routes
+app.use('/api/accounts',accountRoutes);
+app.use('/api/auth',authRoutes);
 
 
 
