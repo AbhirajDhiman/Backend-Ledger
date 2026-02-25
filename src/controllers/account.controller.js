@@ -21,6 +21,47 @@ async function createAccountController(req,res){
         });
     }
 }
+
+async function getuserAccountsController(req,res){
+    try{
+        const user=req.user;
+        const accounts=await accountModel.find({userId:user._id});
+        res.status(200).json({
+            accounts
+        });
+    }catch(error){
+        return res.status(500).json({
+            message: error.message || 'Something went wrong',
+            status: 'failed'
+        });
+    }
+}
+async function getAccountBalanceController(req,res){
+    const{accountId}=req.params;
+    try{
+        const account=await accountModel.findOne({
+            _id:accountId,
+            userId:req.user._id
+        });
+        if(!account){
+            return res.status(404).json({
+                message:'Account not found'
+            });
+        }
+        const balance=await account.getBalance();
+        return res.status(200).json({
+            accountId,
+            balance
+        });
+    }catch(error){
+        return res.status(500).json({
+            message: error.message || 'Something went wrong',
+            status: 'failed'
+        });
+    }
+}
 module.exports={
-    createAccountController
+    createAccountController,
+    getuserAccountsController,
+    getAccountBalanceController
 }

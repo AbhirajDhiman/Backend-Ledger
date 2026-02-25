@@ -13,7 +13,7 @@ router.post('/register',authController.registerUser);
 router.post('/login',authController.LoginUserController);
 
 
-
+router.post('/logout',authController.LogoutUserController);
 
 
 module.exports=router;

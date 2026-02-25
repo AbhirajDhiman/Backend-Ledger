@@ -2,6 +2,7 @@ console.log('Auth controller loaded');
 const userModel=require('../models/user.model');
 const jwt=require('jsonwebtoken');
 const emailService=require('../services/email.service');
+const tokenBlacklistModel=require('../models/tokenBlacklist.model');
 /**
  *User Registration controller
  *POST /api/auth/register
@@ -102,8 +103,35 @@ async function LoginUserController(req,res){
         });
     }
 }
+/*
+* User Logout controller
+* POST /api/auth/logout
+*/
+async function LogoutUserController(req,res){
+    try{
+        const token=req.cookies.token || req.headers['authorization']?.split(' ')[1];
+        if(!token){
+            return res.status(400).json({message:'No token provided'});
+        }
 
+        await tokenBlacklistModel.create({
+            token:token
+        });
+
+        res.clearCookie('token');
+        return res.status(200).json({
+            message:'Logged out successfully',
+            status:'success'
+        });
+    }catch(error){
+        return res.status(500).json({
+            message:error.message || 'Something went wrong',
+            status:'failed'
+        });
+    }
+}
 module.exports={
     registerUser,
-    LoginUserController
+    LoginUserController,
+    LogoutUserController
 }
