@@ -2,31 +2,54 @@ console.log('email.service.js loaded');
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user: process.env.EMAIL_USER,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN,
-  },
-});
+const sanitizeEnvValue = (value = '') => value.toString().trim().replace(/^['\"]|['\"]$/g, '').replace(/;\s*$/, '');
 
-// Verify the connection configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('Error connecting to email server:', error);
-  } else {
-    console.log('Email server is ready to send messages');
-  }
-});
+const emailUser = sanitizeEnvValue(process.env.EMAIL_USER || '');
+const clientId = sanitizeEnvValue(process.env.CLIENT_ID || '');
+const clientSecret = sanitizeEnvValue(process.env.CLIENT_SECRET || '');
+const refreshToken = sanitizeEnvValue(process.env.REFRESH_TOKEN || '');
+const smtpHost = sanitizeEnvValue(process.env.SMTP_HOST || 'smtp.gmail.com');
+const smtpPort = Number.parseInt(sanitizeEnvValue(process.env.SMTP_PORT || '587'), 10) || 587;
+const smtpSecure = sanitizeEnvValue(process.env.SMTP_SECURE || (smtpPort === 465 ? 'true' : 'false')) === 'true';
+
+const emailEnabled = Boolean(emailUser && clientId && clientSecret && refreshToken);
+
+let transporter = null;
+if (emailEnabled) {
+  transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpSecure,
+    requireTLS: !smtpSecure,
+    auth: {
+      type: 'OAuth2',
+      user: emailUser,
+      clientId: clientId,
+      clientSecret: clientSecret,
+      refreshToken: refreshToken,
+    },
+  });
+
+  transporter.verify((error) => {
+    if (error) {
+      console.error('Error connecting to email server:', error.message || error);
+    } else {
+      console.log('Email server is ready to send messages');
+    }
+  });
+} else {
+  console.warn('Email service disabled: missing EMAIL_USER/CLIENT_ID/CLIENT_SECRET/REFRESH_TOKEN env vars.');
+}
 
 // Function to send email
 const sendEmail = async (to, subject, text, html) => {
+  if (!transporter) {
+    return false;
+  }
+
   try {
     const info = await transporter.sendMail({
-      from: `"Backend Ledger" <${process.env.EMAIL_USER}>`, // sender address
+      from: `"Backend Ledger" <${emailUser}>`, // sender address
       to, // list of receivers
       subject, // Subject line
       text, // plain text body
@@ -35,8 +58,10 @@ const sendEmail = async (to, subject, text, html) => {
 
     console.log('Message sent: %s', info.messageId);
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    return true;
   } catch (error) {
     console.error('Error sending email:', error);
+    return false;
   }
 };
 
@@ -64,4 +89,6 @@ async function sendTransactionFailedEmail(userEmail, userName, transactionDetail
 module.exports = {
   sendEmail,
   sendRegistrationEmail,
+  sendTransactionEmail,
+  sendTransactionFailedEmail,
 };
