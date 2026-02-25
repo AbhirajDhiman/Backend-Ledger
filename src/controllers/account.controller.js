@@ -1,3 +1,4 @@
+console.log('account.controller.js loaded');
 const accountModel=require('../models/account.model');
 
 // Create a middle for checking if user is loggedin or not

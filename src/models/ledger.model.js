@@ -1,4 +1,5 @@
-const e = require('express');
+console.log('ledger.model.js loaded');
+const express = require('express');
 const mongoose = require('mongoose');
 const LedgerSchema = new mongoose.Schema({
     account: {

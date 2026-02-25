@@ -1,3 +1,4 @@
+console.log('email.service.js loaded');
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
