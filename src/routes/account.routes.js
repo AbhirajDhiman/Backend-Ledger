@@ -8,6 +8,6 @@ const accountController=require('../controllers/account.controller');
 //Post /api/accounts/
 // Create a new account
 // Protected route, requires authentication
-router.post('/',authMiddleware,accountController.createAccountController);
+router.post('/',authMiddleware.authMiddleware,accountController.createAccountController);
 
 module.exports=router;

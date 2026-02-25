@@ -3,6 +3,7 @@ const Transaction = require('../models/transaction.model');
 const ledgerModel = require('../models/ledger.model');
 const emailService = require('../services/email.service');
 const accountModel = require('../models/account.model');
+const mongoose = require('mongoose');
 /*
 -- Create a new transaction
 THE 10-STEP TRANSFER FLOW:
@@ -37,9 +38,15 @@ async function createTransaction(req,res){
         }
 
         // Step 2: Validate idempotency key
-        const existingTransaction=await Transaction.findOne({idempotencyKey:idempotencyKey});
+        const existingTransaction=await Transaction.findOne({
+            idempotencyKey:idempotencyKey
+        });
         if(existingTransaction){
-            if(existingTransaction.status==='PENDING' || existingTransaction.status==='COMPLETED'){
+            if(existingTransaction.status==='PENDING'){
+                return res.status(200).json(existingTransaction);
+            }
+
+            if(existingTransaction.status==='COMPLETED'){
                 return res.status(200).json(existingTransaction);
             }
 
@@ -84,7 +91,7 @@ async function createTransaction(req,res){
         }],{session:session});
 
         // Step 6: Create DEBIT ledger entry
-        await ledgerModel.create([{
+        const debitEntry=await ledgerModel.create([{
             account:fromaccount,
             amount:amount,
             transaction:transaction[0]._id,
@@ -92,7 +99,7 @@ async function createTransaction(req,res){
         }],{session:session});
 
         // Step 7: Create CREDIT ledger entry
-        await ledgerModel.create([{
+        const creditEnter=await ledgerModel.create([{
             account:toaccount,
             amount:amount,
             transaction:transaction[0]._id,
@@ -101,8 +108,9 @@ async function createTransaction(req,res){
 
         transaction[0].status='COMPLETED';
         await transaction[0].save({session:session});
+        // Step 8: Mark transaction COMPLETED
 
-        // Step 8 & 9: Mark transaction COMPLETED and Commit MongoDB session
+        // Step 9: Commit MongoDB session
         await session.commitTransaction();
         session.endSession();
 
@@ -128,7 +136,79 @@ async function createTransaction(req,res){
         });
     }
 }
+async function createInitialTransaction(req,res){
+    let session;
+    try{
+        const {toaccount,amount,idempotencyKey}=req.body;
+        if(!toaccount || !amount || !idempotencyKey){
+            return res.status(400).json({
+                error:'toaccount, amount and idempotencyKey are required'
+            });
+        }
 
+        const toUserAccount=await accountModel.findById(toaccount);
+        if(!toUserAccount){
+            return res.status(404).json({
+                error:'toaccount not found'
+            });
+        }
+
+        const fromAccount=await accountModel.findOne({
+            userId:req.user._id,
+            accountType:'ACTIVE'
+        });
+
+        if(!fromAccount){
+            return res.status(500).json({
+                error:'System account not found'
+            });
+        }
+
+        session=await mongoose.startSession();
+        session.startTransaction();
+
+        const transaction=await Transaction.create([{
+            fromaccount:fromAccount._id,
+            toaccount,
+            amount,
+            idempotencyKey,
+            status:'PENDING'
+        }],{session:session});
+
+        await ledgerModel.create([{
+            account:fromAccount._id,
+            amount,
+            transaction:transaction[0]._id,
+            type:'DEBIT'
+        }],{session:session});
+
+        await ledgerModel.create([{
+            account:toaccount,
+            amount,
+            transaction:transaction[0]._id,
+            type:'CREDIT'
+        }],{session:session});
+
+        transaction[0].status='COMPLETED';
+        await transaction[0].save({session:session});
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(201).json({
+            message:'Initial transaction completed successfully',
+            transaction:transaction[0]
+        });
+    }catch(error){
+        if(session){
+            await session.abortTransaction();
+            session.endSession();
+        }
+        return res.status(500).json({
+            error:error.message || 'Initial transaction failed'
+        });
+    }
+}
 module.exports={
-    createTransaction
+    createTransaction,
+    createInitialTransaction
 };

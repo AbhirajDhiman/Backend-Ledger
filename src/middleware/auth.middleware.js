@@ -21,4 +21,25 @@ async function authMiddleware(req,res,next){
     }
 }
 
-module.exports=authMiddleware;
+async function authSystemUserMiddleware(req,res,next){
+    const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+    if(!token){
+        return res.status(401).json({message:'Unauthorized: No token provided'});
+    }
+    try{
+        const decoded=jwt.verify(token,process.env.JWT_SECRET_KEY);
+        const user=await userModel.findById(decoded.id).select('+systemuser');
+        if(!user.systemuser){
+            return res.status(401).json({message:'Unauthorized: User is not a system user'});
+        }
+        req.user=user;
+        next();
+    }catch(error){
+        return res.status(401).json({message:'Unauthorized: Invalid token'});
+    }
+}
+
+module.exports={
+    authMiddleware,
+    authSystemUserMiddleware
+};
