@@ -16,8 +16,18 @@ app.use('/api/accounts',accountRoutes);
 app.use('/api/auth',authRoutes);
 app.use('/api/transactions',transactionRoutes);
 
+
 app.get('/',(req,res)=>{
     res.send('Welcome to the Ledger API');
+});
+
+// Health check endpoint
+app.get('/health',(req,res)=>{
+    res.status(200).json({
+        status:'ok',
+        message:'Backend-Ledger API is healthy',
+        timestamp:new Date().toISOString()
+    });
 });
 
 
