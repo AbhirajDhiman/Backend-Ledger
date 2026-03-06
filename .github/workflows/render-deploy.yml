@@ -1,0 +1,31 @@
+name: Render Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST \
+          https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+
+      - name: Mark Deployment
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: production
+          status: success
+          env_url: https://backend-ledger-4lom.onrender.com
