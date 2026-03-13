@@ -10,10 +10,29 @@ const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
     .map((origin) => origin.trim())
     .filter(Boolean);
 
+const allowVercelPreviews = (process.env.ALLOW_VERCEL_PREVIEWS || 'true') === 'true';
+
+function isAllowedOrigin(origin = '') {
+    if (allowedOrigins.includes(origin)) {
+        return true;
+    }
+
+    if (!allowVercelPreviews) {
+        return false;
+    }
+
+    try {
+        const hostname = new URL(origin).hostname;
+        return hostname.endsWith('.vercel.app');
+    } catch (error) {
+        return false;
+    }
+}
+
 
 app.use(cors({
     origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || isAllowedOrigin(origin)) {
             return callback(null, true);
         }
 
