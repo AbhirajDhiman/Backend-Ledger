@@ -136,6 +136,40 @@ async function createTransaction(req,res){
         });
     }
 }
+
+async function getUserTransactions(req,res){
+    try{
+        const accounts=await accountModel.find({ userId:req.user._id }).select('_id').lean();
+        const accountIds=accounts.map((account)=>account._id);
+
+        if(accountIds.length===0){
+            return res.status(200).json({
+                transactions: []
+            });
+        }
+
+        const transactions=await Transaction.find({
+            $or:[
+                { fromaccount: { $in: accountIds } },
+                { toaccount: { $in: accountIds } }
+            ]
+        })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .populate('fromaccount', 'currency accountType')
+            .populate('toaccount', 'currency accountType')
+            .lean();
+
+        return res.status(200).json({
+            transactions
+        });
+    }catch(error){
+        return res.status(500).json({
+            error:error.message || 'Unable to load transactions'
+        });
+    }
+}
+
 async function createInitialTransaction(req,res){
     let session;
     try{
@@ -209,6 +243,7 @@ async function createInitialTransaction(req,res){
     }
 }
 module.exports={
+    getUserTransactions,
     createTransaction,
     createInitialTransaction
 };

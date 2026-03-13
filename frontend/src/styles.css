@@ -1,0 +1,421 @@
+:root {
+  color-scheme: light;
+  --bg: #f3efe7;
+  --panel: rgba(255, 252, 247, 0.9);
+  --panel-strong: #fffaf2;
+  --line: rgba(56, 45, 31, 0.12);
+  --text: #1f1b17;
+  --muted: #6f6356;
+  --accent: #0f766e;
+  --accent-2: #d97706;
+  --danger: #b42318;
+  --success: #027a48;
+  --shadow: 0 24px 60px rgba(62, 42, 18, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(217, 119, 6, 0.22), transparent 28%),
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.2), transparent 24%),
+    linear-gradient(180deg, #f8f3ea 0%, #ede4d6 100%);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+#root {
+  width: 100%;
+}
+
+.page-shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+}
+
+.hero-panel,
+.panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.hero-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.9fr);
+  gap: 24px;
+  padding: 32px;
+  border-radius: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-panel::after {
+  content: '';
+  position: absolute;
+  inset: auto -80px -80px auto;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(15, 118, 110, 0.24), transparent 65%);
+}
+
+.hero-copy h1,
+.panel h2,
+.account-card h3,
+.transaction-row h3 {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.hero-copy h1 {
+  margin: 0 0 16px;
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  line-height: 0.95;
+  max-width: 10ch;
+}
+
+.hero-text {
+  max-width: 62ch;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hero-badges,
+.account-meta,
+.hero-panel dl,
+.transaction-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hero-badges span,
+.account-meta span,
+.transaction-meta span,
+.status-card dd {
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(56, 45, 31, 0.08);
+}
+
+.status-card {
+  align-self: stretch;
+  background: linear-gradient(180deg, rgba(15, 118, 110, 0.08), rgba(255, 255, 255, 0.7));
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.status-card h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.status-card dl {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+}
+
+.status-card dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.status-card dd {
+  margin: 0;
+  display: inline-flex;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.panel {
+  border-radius: 28px;
+  padding: 24px;
+}
+
+.auth-panel,
+.workflow-panel {
+  grid-column: span 6;
+}
+
+.accounts-panel,
+.transactions-panel {
+  grid-column: span 8;
+}
+
+.transfer-panel {
+  grid-column: span 4;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.tab-row {
+  display: inline-flex;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(31, 27, 23, 0.06);
+  margin-bottom: 20px;
+}
+
+.tab,
+.primary-button,
+.secondary-button,
+.ghost-button {
+  border: 0;
+  border-radius: 16px;
+  transition: transform 180ms ease, opacity 180ms ease, background 180ms ease;
+}
+
+.tab {
+  background: transparent;
+  color: var(--muted);
+  padding: 10px 16px;
+}
+
+.tab.active {
+  background: var(--panel-strong);
+  color: var(--text);
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button {
+  padding: 12px 16px;
+  font-weight: 700;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, var(--accent), #115e59);
+  color: white;
+}
+
+.secondary-button {
+  background: linear-gradient(135deg, var(--accent-2), #b45309);
+  color: white;
+}
+
+.ghost-button {
+  background: rgba(31, 27, 23, 0.06);
+  color: var(--text);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.ghost-button:hover,
+.tab:hover {
+  transform: translateY(-1px);
+}
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.ghost-button:disabled,
+.tab:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+}
+
+label span {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+input,
+select {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(56, 45, 31, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  padding: 14px 16px;
+  color: var(--text);
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid rgba(15, 118, 110, 0.25);
+  border-color: rgba(15, 118, 110, 0.4);
+}
+
+.feedback {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.feedback.success {
+  background: rgba(2, 122, 72, 0.1);
+  color: var(--success);
+}
+
+.feedback.error {
+  background: rgba(180, 35, 24, 0.1);
+  color: var(--danger);
+}
+
+.workflow-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  display: grid;
+  gap: 12px;
+}
+
+.account-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.account-card {
+  padding: 20px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 247, 237, 0.9));
+  border: 1px solid rgba(56, 45, 31, 0.08);
+}
+
+.account-index {
+  margin: 0 0 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+}
+
+.balance-value {
+  margin: 8px 0 18px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.transaction-list {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.transaction-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(56, 45, 31, 0.08);
+}
+
+.transaction-row h3,
+.panel h2 {
+  margin: 0;
+}
+
+.transaction-status {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.transaction-meta {
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.signed-in-card,
+.empty-state {
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--muted);
+  border: 1px dashed rgba(56, 45, 31, 0.18);
+}
+
+.hint {
+  color: var(--muted);
+  margin: 0;
+}
+
+@media (max-width: 1080px) {
+  .hero-panel,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel,
+  .workflow-panel,
+  .accounts-panel,
+  .transactions-panel,
+  .transfer-panel {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .page-shell {
+    padding-inline: 14px;
+  }
+
+  .hero-panel,
+  .panel {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .panel-heading,
+  .transaction-row {
+    flex-direction: column;
+  }
+
+  .transaction-meta {
+    align-items: flex-start;
+  }
+}

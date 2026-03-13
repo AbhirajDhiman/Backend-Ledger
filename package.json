@@ -1,24 +1,14 @@
 {
-  "name": "backend-ledger",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "name": "backend-ledger-workspace",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx nodemon server.js",
-    "start": "node server.js"
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix frontend\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "start": "npm run start --prefix server",
+    "build": "npm run build --prefix frontend"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cookie-parser": "^1.4.7",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.2",
-    "nodemailer": "^8.0.1"
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
