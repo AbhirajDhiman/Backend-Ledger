@@ -28,6 +28,7 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [feedback, setFeedback] = useState('');
   const [error, setError] = useState('');
+  const [depositAmounts, setDepositAmounts] = useState({});
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -176,6 +177,27 @@ function App() {
         await refreshDashboard();
       } catch (accountError) {
         setError(accountError.message);
+      }
+    });
+  }
+
+  async function handleDeposit(accountId) {
+    const amount = Number(depositAmounts[accountId]);
+    if (!amount || amount <= 0) return;
+    setFeedback('');
+    setError('');
+    startTransition(async () => {
+      try {
+        await apiRequest('/api/transactions/deposit', {
+          method: 'POST',
+          token,
+          body: { accountId, amount },
+        });
+        setDepositAmounts((prev) => ({ ...prev, [accountId]: '' }));
+        setFeedback('Deposit successful.');
+        await refreshDashboard();
+      } catch (depositError) {
+        setError(depositError.message);
       }
     });
   }
@@ -372,6 +394,27 @@ function App() {
                   <div className="account-meta">
                     <span>{account.accountType}</span>
                     <span>{account._id.slice(-6)}</span>
+                  </div>
+                  <div className="deposit-row">
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      placeholder="Add funds"
+                      value={depositAmounts[account._id] || ''}
+                      onChange={(event) =>
+                        setDepositAmounts((prev) => ({ ...prev, [account._id]: event.target.value }))
+                      }
+                      disabled={isPending || account.accountType !== 'ACTIVE'}
+                    />
+                    <button
+                      className="ghost-button"
+                      type="button"
+                      disabled={isPending || !depositAmounts[account._id] || account.accountType !== 'ACTIVE'}
+                      onClick={() => handleDeposit(account._id)}
+                    >
+                      Deposit
+                    </button>
                   </div>
                 </article>
               ))

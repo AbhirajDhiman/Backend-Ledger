@@ -242,8 +242,70 @@ async function createInitialTransaction(req,res){
         });
     }
 }
+async function depositFunds(req, res) {
+    let session;
+    try {
+        const { accountId, amount } = req.body;
+        if (!accountId || !amount || Number(amount) <= 0) {
+            return res.status(400).json({ error: 'accountId and a positive amount are required' });
+        }
+
+        // Only allow deposit into the authenticated user's own account
+        const account = await accountModel.findOne({ _id: accountId, userId: req.user._id });
+        if (!account) {
+            return res.status(404).json({ error: 'Account not found' });
+        }
+        if (account.accountType !== 'ACTIVE') {
+            return res.status(400).json({ error: 'Account is not ACTIVE' });
+        }
+
+        const idempotencyKey = `deposit-${req.user._id}-${accountId}-${Date.now()}`;
+
+        session = await mongoose.startSession();
+        session.startTransaction();
+
+        // Create a DEPOSIT transaction record (self-referential: external → account)
+        const transaction = await Transaction.create([{
+            fromaccount: accountId,
+            toaccount: accountId,
+            amount: Number(amount),
+            idempotencyKey,
+            status: 'PENDING'
+        }], { session });
+
+        // Credit-only ledger entry (demo faucet – funds come from outside the system)
+        await ledgerModel.create([{
+            account: accountId,
+            amount: Number(amount),
+            transaction: transaction[0]._id,
+            type: 'CREDIT'
+        }], { session });
+
+        transaction[0].status = 'COMPLETED';
+        await transaction[0].save({ session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        const newBalance = await account.getBalance();
+        return res.status(201).json({
+            message: 'Deposit successful',
+            accountId,
+            deposited: Number(amount),
+            balance: newBalance
+        });
+    } catch (error) {
+        if (session) {
+            await session.abortTransaction();
+            session.endSession();
+        }
+        return res.status(500).json({ error: error.message || 'Deposit failed' });
+    }
+}
+
 module.exports={
     getUserTransactions,
     createTransaction,
-    createInitialTransaction
+    createInitialTransaction,
+    depositFunds
 };

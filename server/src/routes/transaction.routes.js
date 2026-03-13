@@ -14,6 +14,9 @@ transactionRoutes.get('/',authMiddleware.authMiddleware,transactionController.ge
 
 transactionRoutes.post('/',authMiddleware.authMiddleware,transactionController.createTransaction);
 
+// POST /api/transactions/deposit — demo faucet: credit any of the user's own accounts
+transactionRoutes.post('/deposit',authMiddleware.authMiddleware,transactionController.depositFunds);
+
 if(typeof transactionController.createInitialTransaction==='function'){
 	transactionRoutes.post('/system/initialfund',authMiddleware.authSystemUserMiddleware,transactionController.createInitialTransaction);
 }
