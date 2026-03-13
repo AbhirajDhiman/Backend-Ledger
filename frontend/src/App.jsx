@@ -14,6 +14,7 @@ const initialTransferForm = {
 };
 
 function App() {
+  const isDevelopment = import.meta.env.DEV;
   const [token, setToken] = useState(() => window.localStorage.getItem('ledger-token') || '');
   const [user, setUser] = useState(() => {
     const rawUser = window.localStorage.getItem('ledger-user');
@@ -230,24 +231,22 @@ function App() {
           </div>
         </div>
         <div className="status-card">
-          <h2>Environment</h2>
+          <h2>Connection status</h2>
           <dl>
-            <div>
-              <dt>Frontend URL</dt>
-              <dd>http://localhost:5173</dd>
-            </div>
-            <div>
-              <dt>API Base URL</dt>
-              <dd>{API_BASE_URL}</dd>
-            </div>
             <div>
               <dt>Backend health</dt>
               <dd>
                 {health.loading && 'Checking...'}
-                {!health.loading && health.data && health.data.status}
+                {!health.loading && health.data && 'Online'}
                 {!health.loading && health.error && `Unavailable: ${health.error}`}
               </dd>
             </div>
+            {isDevelopment ? (
+              <div>
+                <dt>API Base URL</dt>
+                <dd>{API_BASE_URL}</dd>
+              </div>
+            ) : null}
           </dl>
         </div>
       </header>
